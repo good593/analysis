@@ -2,7 +2,7 @@ from datetime import datetime, date
 import pandas as pd 
 from pyspark.sql import Row, SparkSession 
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, ArrayType, BooleanType, MapType
-from pyspark.sql.functions import col, when, udf, count, lit, collect_list, countDistinct
+from pyspark.sql.functions import col, when, udf, count, lit, collect_list, countDistinct, pandas_udf
 
 # https://stackoverflow.com/questions/41123846/why-does-join-fail-with-java-util-concurrent-timeoutexception-futures-timed-ou
 spark = SparkSession.builder.appName("Your App").config("spark.sql.broadcastTimeout", "36000").getOrCreate()
@@ -14,6 +14,8 @@ spark.conf.set('spark.sql.repl.eagerEval.enabled', True)
 df = spark.read.parquet("/temp/out/people.parquet")
 df.printSchema()
 
+df = df.withColumn('test', df.score - df.age)
+
 # datatype 변경
 df.withColumn('gender', df.gender.cast('String')).show()
 
@@ -21,33 +23,8 @@ df.withColumn('gender', df.gender.cast('String')).show()
 df.withColumn('Country', lit("USA")).show()
 
 # condition
-condition = when(df.gender == 1, "Male").when(df.gender == 0, "Female").when(df.gender.isNull(), "").otherwise(df.gender)
+condition = when(df.gender == 1, "Male").when(df.gender == 0, "Female").when(df.gender < 0 | df.gender > 1, None).otherwise(df.gender)
 df.withColumn('new_gender', condition).show()
-
-##########################################################################################
-# apply
-##########################################################################################
-def fnc(score, gender)->list[str]: 
-  result = []
-  try:
-    result.append(str(score + gender))
-  except:
-    pass
-  return result
-
-udf_fnc = udf(fnc, ArrayType(StringType()))
-df = df.withColumn('test', udf_fnc(df.score, df.gender))
-
-def fnc(score)->dict:
-  result = {}
-  try:
-    result['score'] = int(score)
-  except:
-    pass
-  return result
-
-udf_fnc = udf(fnc, MapType(StringType(), IntegerType()))
-df = df.withColumn('test', udf_fnc(df.score))
 
 ##########################################################################################
 # withColumnRenamed
