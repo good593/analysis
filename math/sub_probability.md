@@ -121,3 +121,7 @@
   - $Var(X - Y) = Var(X) + Var(Y) - 2Cov(X,Y)$
   - X,Y가 독립인경우,
     - $Cov(X,Y) = 0$
+
+
+
+
