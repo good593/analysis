@@ -1,5 +1,21 @@
 # analysis
 
-## 1. pyspark
-## 2. pandas
-## 3. matplotlib
+## library
+- matplotlib
+- numpy
+- OpenCV
+- pandas
+- scipy
+- seaborn
+## math
+- linear algebra
+## model
+- catboost
+- irt
+- Light GBM
+- pycaret
+- shap
+- XGBoost
+## sql
+- ansi
+- postgre
